@@ -25,6 +25,7 @@ def create_graph():
         G = nx.from_numpy_array(np.array(adjacency_matrix))
 
         # Yêu cầu người dùng nhập đỉnh xuất phát
+        root.withdraw()
         start_vertex = simpledialog.askinteger("Start Vertex", "Enter the starting vertex (0 to {}):".format(num_vertices - 1), minvalue=0, maxvalue=num_vertices - 1)
 
         if start_vertex is None:
@@ -63,27 +64,29 @@ def create_graph():
 root = tk.Tk()
 root.title("Minimum Spanning Tree Visualization")
 root.geometry('500x300')
+root['bg'] = 'pink'
 
 # Tạo các thành phần giao diện người dùng
 
 #Tao label hien thi chu nhau dinh cua do thi
-label_vertices = tk.Label(root, text="Number of Vertices:", font = ('Verdena', 14))
+label_vertices = tk.Label(root, text="Số đỉnh:", font = ('Verdena', 14), bg = 'pink')
 label_vertices.place(x = 20, y = 30)
 
 #tao mot entry de nhap dinh cua do thi
-entry_vertices = tk.Entry(root)
-
+entry_vertices = tk.Entry(root,width= 10, font= ('Verdena',12))
+entry_vertices.place(x = 150, y = 33)
 
 #tao lable nhac nhap trong so
-label_matrix = tk.Label(root, text="Adjacency Matrix:")
-
+label_matrix = tk.Label(root, text="Ma trận kề:", font = ('Verdena', 14), bg = 'pink')
+label_matrix.place(x = 20, y = 80 )
 
 #tao crolledtext de nhap cac trong so
-scrolledtext_matrix = scrolledtext.ScrolledText(root, width=30, height=10)
-
+scrolledtext_matrix = scrolledtext.ScrolledText(root, width=30, height=8)
+scrolledtext_matrix.place(x=150, y=80)
 
 #tao button de bat dau tao graph
-button_create_graph = tk.Button(root, text="Create Minimum Spanning Tree", command=create_graph)
+button_create_graph = tk.Button(root, text="Cây khung nhỏ nhất", font= ('Verdena'), command=create_graph)
+button_create_graph.place(x = 150, y =250)
 
 
 root.mainloop()
