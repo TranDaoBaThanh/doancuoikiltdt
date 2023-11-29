@@ -136,27 +136,20 @@ def prim():
     except ValueError as e:
         tk.messagebox.showerror("Error", str(e))
 
-# Tạo cửa sổ chính
 root = tk.Tk()
 root.title("Minimum Spanning Tree Visualization")
 root.geometry('450x300')
 root['bg'] = 'pink'
 
-# Tạo các thành phần giao diện người dùng
-
-#Tao label hien thi chu nhau dinh cua do thi
 label_vertices = tk.Label(root, text="Nhập số đỉnh:", font = ('Verdena', 14), bg = 'pink')
 label_vertices.place(x = 20, y = 30)
 
-#tao mot entry de nhap dinh cua do thi
 entry_vertices = tk.Entry(root,width= 10, font= ('Verdena',12))
 entry_vertices.place(x = 170, y = 33)
 
-#tao lable nhac nhap trong so
 label_matrix = tk.Label(root, text="Nhập ma trận kề:", font = ('Verdena', 14), bg = 'pink')
 label_matrix.place(x = 20, y = 80 )
 
-#tao crolledtext de nhap cac trong so
 scrolledtext_matrix = scrolledtext.ScrolledText(root, width=30, height=8, font = ('Verdena',10))
 scrolledtext_matrix.place(x=170, y=80)
 
