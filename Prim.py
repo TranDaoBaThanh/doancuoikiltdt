@@ -136,6 +136,13 @@ def prim():
     except ValueError as e:
         tk.messagebox.showerror("Error", str(e))
 
+def perform_algorithm():
+    selected_algorithm = combobox.get()
+    if selected_algorithm == 'Prim':
+        prim()
+    elif selected_algorithm == 'Dijkstra':
+        dijkstra()
+
 root = tk.Tk()
 root.title("Minimum Spanning Tree Visualization")
 root.geometry('450x300')
@@ -160,11 +167,8 @@ combobox = ttk.Combobox(root, font = ('Verdena'), width= 10)
 combobox['value'] = ('Prim', 'Dijkstra')
 combobox.place(x = 150, y = 250)
 
-if combobox.get() == 'Prim':
-    button_do = tk.Button(root, text="Thực hiện", font = ('verdena',12), command= prim)
-    button_do.place(x = 300, y = 250)
-else:
-    button_do = tk.Button(root, text="Thực hiện", font = ('verdena',12), command= dijkstra)
-    button_do.place(x = 300, y = 250)
+button_do = tk.Button(root, text="Thực hiện", font = ('verdena',12), command= perform_algorithm)
+button_do.place(x = 300, y = 250)
+    
 
 root.mainloop()
