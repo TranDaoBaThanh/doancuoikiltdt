@@ -81,7 +81,7 @@ label_matrix = tk.Label(root, text="Ma trận kề:", font = ('Verdena', 14), bg
 label_matrix.place(x = 20, y = 80 )
 
 #tao crolledtext de nhap cac trong so
-scrolledtext_matrix = scrolledtext.ScrolledText(root, width=30, height=8)
+scrolledtext_matrix = scrolledtext.ScrolledText(root, width=30, height=8, font = ('Verdena',10))
 scrolledtext_matrix.place(x=150, y=80)
 
 #tao button de bat dau tao graph
