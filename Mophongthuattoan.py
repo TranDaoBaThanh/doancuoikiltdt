@@ -144,7 +144,7 @@ def perform_algorithm():
         dijkstra()
 
 root = tk.Tk()
-root.title("Minimum Spanning Tree Visualization")
+root.title("Mo phong truc quan thuat toan")
 root.geometry('450x300')
 root['bg'] = 'pink'
 
