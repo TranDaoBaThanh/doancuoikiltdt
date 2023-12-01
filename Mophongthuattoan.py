@@ -1,60 +1,76 @@
 import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import simpledialog
+from tkinter import messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from tkinter import ttk
+import heapq
 
+def dijkstra_algorithm(graph, start_vertex, target_vertex):
+    # Initialize distances and predecessors
+    distances = {vertex: float('infinity') for vertex in graph.nodes}
+    distances[start_vertex] = 0
+    predecessors = {vertex: None for vertex in graph.nodes}
+
+    # Priority queue to store vertices with their distances
+    priority_queue = [(0, start_vertex)]
+
+    while priority_queue:
+        current_distance, current_vertex = heapq.heappop(priority_queue)
+
+        # Check if the current distance is greater than the known distance
+        if current_distance > distances[current_vertex]:
+            continue
+
+        # Explore neighbors
+        for neighbor, edge_data in graph[current_vertex].items():
+            distance = distances[current_vertex] + edge_data['weight']
+
+            # Update distance and predecessor if a shorter path is found
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                predecessors[neighbor] = current_vertex
+                heapq.heappush(priority_queue, (distance, neighbor))
+
+    # Reconstruct the shortest path
+    shortest_path = []
+    current_vertex = target_vertex
+
+    while current_vertex is not None:
+        shortest_path.insert(0, current_vertex)
+        current_vertex = predecessors[current_vertex]
+
+    return shortest_path, distances[target_vertex]
+
+# Modify your existing dijkstra function
 def dijkstra():
     try:
-        num_vertices = int(entry_vertices.get()) # số đỉnh của đồ thị
-        matrix_values = scrolledtext_matrix.get("1.0", tk.END).strip().split('\n') # giá trị của ma trận kề
-        #strip() ham xoa khoang trang
-        #split('\n') ham chia chuoi thanh nhieu dong tai noi \n
+        num_vertices = int(entry_vertices.get())
+        matrix_values = scrolledtext_matrix.get("1.0", tk.END).strip().split('\n')
 
-        # tách ma trận ra
         adjacency_matrix = []
         for row in matrix_values:
             values = list(map(int, row.split()))
             adjacency_matrix.append(values)
 
-        # nếu người nhâp để trống thì xuất ra màn hình
         if len(adjacency_matrix) != num_vertices or any(len(row) != num_vertices for row in adjacency_matrix):
-            raise ValueError("Đầu vào không hợp lệ. Hãy đảm bảo ma trận là hình vuông và có số đỉnh chính xác.")
+            raise ValueError("Invalid input. Please make sure the matrix is square and has the correct number of vertices.")
 
-        # tạo đồ thị G từ adjacency_matrix
         G = nx.from_numpy_array(np.array(adjacency_matrix))
-        '''
-        0 4 3 0 0 0 0 0
-        4 0 2 5 0 0 0 0
-        3 2 0 3 6 0 0 0
-        0 5 3 0 1 5 0 0
-        0 0 6 1 0 0 5 0 
-        0 0 0 5 0 0 2 7 
-        0 0 0 0 5 2 0 4
-        0 0 0 0 0 7 4 0
-        '''
 
-        '''
-        0 0 0 0 0 0
-        7 0 0 2 0 0
-        0 4 0 0 0 2
-        8 0 0 0 0 6
-        0 2 0 2 0 0
-        0 1 0 0 3 0
-        '''
-        # Nhập đỉnh bắt đầu và đỉnh kết thúc
-        source_node = simpledialog.askinteger("Đỉnh bắt đầu", "Nhập đỉnh bắt đầu (0 đến {}):".format(num_vertices - 1), minvalue=0, maxvalue=num_vertices - 1)
-        target_node = simpledialog.askinteger("Đỉnh kết thúc", "Nhập đỉnh kết thúc (0 đến {}):".format(num_vertices - 1), minvalue=0, maxvalue=num_vertices - 1)
+        source_node = simpledialog.askinteger("Start Vertex", "Enter the starting vertex (0 to {}):".format(num_vertices - 1),
+                                               minvalue=0, maxvalue=num_vertices - 1)
+        target_node = simpledialog.askinteger("Target Vertex", "Enter the target vertex (0 to {}):".format(num_vertices - 1),
+                                               minvalue=0, maxvalue=num_vertices - 1)
 
-        if source_node and target_node is None:
-            return  # Nếu người dùng nhấn Cancel
+        if source_node is None or target_node is None:
+            return  # If the user presses Cancel
 
-        # tìm đường đi từ đỉnh bắt đầu đến đỉnh kết thúc bằng thuật toán dijkstra
-        shortest_path = nx.dijkstra_path(G, source_node, target_node)
-        shortest_path_length = nx.dijkstra_path_length(G, source_node, target_node)
+        # Call the dijkstra_algorithm function
+        shortest_path, shortest_path_length = dijkstra_algorithm(G, source_node, target_node)
 
         # Tạo cửa sổ mới để hiển thị biểu đồ
         graph_window = tk.Toplevel(root)
@@ -82,54 +98,73 @@ def dijkstra():
     except ValueError as e:
         tk.messagebox.showerror("Error", str(e))
 
+def prim_algorithm(graph, start_vertex):
+    # Hàm thực hiện thuật toán Prim bắt đầu từ đỉnh start_vertex
+    min_spanning_tree = nx.Graph()
+    visited = set([start_vertex])
+
+    while len(visited) < len(graph.nodes):
+        possible_edges = []
+
+        for node in visited:
+            possible_edges.extend(graph.edges(node, data=True))
+
+        # Lọc ra các cạnh mà không kết nối đỉnh đã thăm
+        possible_edges = [edge for edge in possible_edges if edge[1] not in visited]
+
+        # Tìm cạnh có trọng số nhỏ nhất
+        min_edge = min(possible_edges, key=lambda x: x[2]['weight'])
+
+        # Thêm cạnh vào cây khung nhỏ nhất
+        min_spanning_tree.add_edge(min_edge[0], min_edge[1], weight=min_edge[2]['weight'])
+        visited.add(min_edge[1])
+
+    return min_spanning_tree
+
 def prim():
     try:
-        num_vertices = int(entry_vertices.get()) #so dinh cua do thi
-        matrix_values = scrolledtext_matrix.get("1.0", tk.END).strip().split('\n') #gia tri cua ma tran ke
+        num_vertices = int(entry_vertices.get())
+        matrix_values = scrolledtext_matrix.get("1.0", tk.END).strip().split('\n')
 
-        # tach matri ra
         adjacency_matrix = []
         for row in matrix_values:
             values = list(map(int, row.split()))
             adjacency_matrix.append(values)
 
-        #neu nguoi nhap de null thi xuat ra man hinh
         if len(adjacency_matrix) != num_vertices or any(len(row) != num_vertices for row in adjacency_matrix):
             raise ValueError("Invalid input. Please make sure the matrix is square and has the correct number of vertices.")
 
-        #tao do thi G tu adjicency_matri
         G = nx.from_numpy_array(np.array(adjacency_matrix))
 
-        # Yêu cầu người dùng nhập đỉnh xuất phát
         root.withdraw()
-        start_vertex = simpledialog.askinteger("Start Vertex", "Enter the starting vertex (0 to {}):".format(num_vertices - 1), minvalue=0, maxvalue=num_vertices - 1)
+        start_vertex = simpledialog.askinteger("Start Vertex", "Enter the starting vertex (0 to {}):".format(num_vertices - 1),
+                                               minvalue=0, maxvalue=num_vertices - 1)
 
         if start_vertex is None:
-            return  # Nếu người dùng nhấn Cancel
+            return  # If the user presses Cancel
 
-        #dung ham minimum_spanning_tree de tim cay khung nho nhat bang thuan toan prim
-        min_spanning_tree = nx.minimum_spanning_tree(G, algorithm='prim')
+        min_spanning_tree = prim_algorithm(G, start_vertex)
 
-        # Tạo cửa sổ mới để hiển thị biểu đồ
+        # Create a new window to display the Minimum Spanning Tree
         graph_window = tk.Toplevel(root)
-        graph_window.title("Graph and Minimum Spanning Tree")
+        graph_window.title("Minimum Spanning Tree")
 
-        # Tạo đồ thị và cây khung trên Canvas
+        # Create a graph and minimum spanning tree on the Canvas
         figure, ax = plt.subplots(figsize=(5, 5))
         canvas = FigureCanvasTkAgg(figure, master=graph_window)
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.pack()
 
-        # Vẽ đồ thị và cây khung
         pos = nx.spring_layout(G)
-        labels = nx.get_edge_attributes(G, 'weight')
-        ax.set_title("Graph and Minimum Spanning Tree")
-        nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color='skyblue', font_color='black', ax=ax)
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, ax=ax)
-        nx.draw(min_spanning_tree, pos, edge_color='red', with_labels=True, font_weight='bold', node_size=700, node_color='skyblue', font_color='black', ax=ax)
 
-        # Đánh dấu đỉnh xuất phát
-        nx.draw_networkx_nodes(G, pos, nodelist=[start_vertex], node_size=700, node_color='red', ax=ax)
+        # Draw the Minimum Spanning Tree
+        nx.draw(min_spanning_tree, pos, edge_color='red', with_labels=True, font_weight='bold', node_size=700,
+                node_color='skyblue', font_color='black', ax=ax)
+
+        # Draw edge labels (weights)
+        labels = nx.get_edge_attributes(min_spanning_tree, 'weight')
+        nx.draw_networkx_edge_labels(min_spanning_tree, pos, edge_labels=labels, ax=ax)
+        nx.draw_networkx_nodes(min_spanning_tree, pos, nodelist=[start_vertex], node_size=700, node_color='green', ax=ax)
 
         canvas.draw()
 
@@ -167,7 +202,7 @@ combobox = ttk.Combobox(root, font = ('Verdena'), width= 10)
 combobox['value'] = ('Prim', 'Dijkstra')
 combobox.place(x = 150, y = 250)
 
-button_do = tk.Button(root, text="Thực hiện", font = ('verdena',12), command= perform_algorithm)
+button_do = tk.Button(root, text="Thực hiện", font = ('verdena',12), command= perform_algorithm )
 button_do.place(x = 300, y = 250)
     
 
